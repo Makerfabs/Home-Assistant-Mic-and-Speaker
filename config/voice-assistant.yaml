@@ -767,7 +767,7 @@ display:
     cs_pin: GPIO8
     dc_pin: GPIO6
     reset_pin: GPIO7
-    rotation: 90
+    rotation: 270
     update_interval: never
     pages:
       - id: idle_page
