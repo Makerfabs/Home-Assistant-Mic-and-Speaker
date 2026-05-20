@@ -1,4 +1,4 @@
-# Makerfabs Home Assistant 2-Mic Array and Speaker
+# Makerfabs Home Assistant Mic and Speaker
 
 ## Intruduce
 [Product Link]()
