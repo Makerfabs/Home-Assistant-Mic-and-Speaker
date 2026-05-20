@@ -134,34 +134,50 @@ light:
     restore_mode: RESTORE_DEFAULT_ON
     default_transition_length: 250ms
 
+i2c:
+  - id: i2c_a
+    sda: GPIO39
+    scl: GPIO38
+    scan: true
+    frequency: 400kHz
+
 i2s_audio:
-  - id: i2s_in
-    i2s_lrclk_pin: GPIO2
+  - id: audio_bus
     i2s_bclk_pin: GPIO42
-  - id: i2s_out
-    i2s_lrclk_pin: GPIO11
-    i2s_bclk_pin: GPIO10
+    i2s_lrclk_pin: GPIO2
+    i2s_mclk_pin: GPIO40
+
+audio_dac:
+  - platform: es8311
+    id: es8311_codec
+    i2c_id: i2c_a
+    use_microphone: False
+    mic_gain: 30DB
+    sample_rate: 16000
+    bits_per_sample: 16bit
+    use_mclk: true
 
 microphone:
   - platform: i2s_audio
     id: box_mic
-    sample_rate: 16000
-    i2s_audio_id: i2s_in
-    i2s_din_pin: GPIO41
-    bits_per_sample: 16bit
+    i2s_audio_id: audio_bus
+    i2s_din_pin: GPIO9
     adc_type: external
-    channel: left
+    pdm: false
+    channel: left     
+    sample_rate: 16000
+    bits_per_sample: 16bit
 
 speaker:
   - platform: i2s_audio
     id: box_speaker
-    i2s_audio_id: i2s_out
-    i2s_dout_pin: GPIO9
+    i2s_audio_id: audio_bus
+    i2s_dout_pin: GPIO41
     dac_type: external
-    sample_rate: 48000
-    bits_per_sample: 16bit
+    audio_dac: es8311_codec
     channel: mono
-    buffer_duration: 100ms
+    sample_rate: 16000
+    bits_per_sample: 16bit
 
 media_player:
   - platform: speaker
@@ -172,7 +188,7 @@ media_player:
     announcement_pipeline:
       speaker: box_speaker
       format: FLAC
-      sample_rate: 48000
+      sample_rate: 16000
       num_channels: 1  # S3 Box only has one output channel
     files:
       - id: timer_finished_sound
@@ -214,7 +230,8 @@ media_player:
 micro_wake_word:
   id: mww
   models:
-    - okay_nabu
+    - model: okay_nabu
+      probability_cutoff: 0.7
     - hey_mycroft
     - hey_jarvis
   on_wake_word_detected:
@@ -228,7 +245,7 @@ voice_assistant:
   micro_wake_word: mww
   noise_suppression_level: 2
   auto_gain: 31dBFS
-  volume_multiplier: 2.0
+  volume_multiplier: 2.5
   on_listening:
     - lambda: id(voice_assistant_phase) = ${voice_assist_listening_phase_id};
     - text_sensor.template.publish:
